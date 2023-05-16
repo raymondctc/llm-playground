@@ -210,8 +210,9 @@ def main():
     # _upsert_pinecone(docs, embeddings)
 
     q="""
-    You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store in year 2023. 
-    Please give a detailed summary for positive, negative and neutral mixed feedbacks in Mar 2023, present them in bullet forms (At least 5 bullet points).
+    You are a data analyst of 9GAG. 9GAG is a social media platform that support UGC contents.
+    The following data you see are all of the app reviews in 2023 downloaded from Google Play Store. 
+    Please give a detailed summary for positive, negative and neutral mixed feedbacks, present them in bullet forms (At least 5 bullet points).
     What are the most of the critical issue of 9GAG overall.
     What do you suggest we focus on improving?
     """
