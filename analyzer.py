@@ -173,12 +173,19 @@ def _query_llm(index_name, filter_dict, embeddings, llm: BaseLanguageModel, quer
 
     if filter_dict is not None:
         print(f"Retrieving with filter, dict={filter_dict}")
-        retriever = docsearch.as_retriever(search_kwargs={
-            "filter": filter_dict
-        })
+        retriever = docsearch.as_retriever(
+            search_kwargs={
+                "filter": filter_dict,
+                "k": 30 # Configuration for getting top_k similar results
+            }
+        )
     else:
         print(f"Retrieving without filter")
-        retriever = docsearch.as_retriever()
+        retriever = docsearch.as_retriever(
+            search_kwargs={
+                "k": 30 # Configuration for getting top_k similar results
+            }
+        )
     
     review_chain = RetrievalQA.from_chain_type(
         llm=llm, 
@@ -199,25 +206,25 @@ def main():
     # docs = _load_csv("./datafiles/reviews_202304.csv")
     # _upsert_pinecone(docs, embeddings)
 
-    docs = _load_csv("./datafiles/reviews_202305.csv")
-    _upsert_pinecone(docs, embeddings)
+    # docs = _load_csv("./datafiles/reviews_202305.csv")
+    # _upsert_pinecone(docs, embeddings)
 
-    # q="""
-    # You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store and it contains all the information in 2023. 
-    # Please give a detailed summary for positive, negative and neutral mixed feedbacks in May 2023, present them in bullet forms (At least 5 bullet points).
-    # What are the most of the critical issue of 9GAG overall.
-    # What do you suggest we focus on improving?
-    # """
+    q="""
+    You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store in year 2023. 
+    Please give a detailed summary for positive, negative and neutral mixed feedbacks in Mar 2023, present them in bullet forms (At least 5 bullet points).
+    What are the most of the critical issue of 9GAG overall.
+    What do you suggest we focus on improving?
+    """
 
-    # extract_filter_llm = OpenAI(temperature=0.0)
-    # info_dict = _extract_info_query(extract_filter_llm, q)
-    # print(f"info_dict extracted={info_dict}")
+    extract_filter_llm = OpenAI(temperature=0.0)
+    info_dict = _extract_info_query(extract_filter_llm, q)
+    print(f"info_dict extracted={info_dict}")
 
-    # filter_dict = _create_filter(infodict=info_dict)
-    # print(f"filter_dict created={filter_dict}")
+    filter_dict = _create_filter(infodict=info_dict)
+    print(f"filter_dict created={filter_dict}")
 
-    # chat_llm = ChatOpenAI(temperature=0.5)
-    # _query_llm(index_name=index_name, filter_dict=filter_dict, embeddings=embeddings, llm=chat_llm, query=q)
+    chat_llm = ChatOpenAI(temperature=1.0)
+    _query_llm(index_name=index_name, filter_dict=filter_dict, embeddings=embeddings, llm=chat_llm, query=q)
 
 if __name__ == "__main__":
     main()
