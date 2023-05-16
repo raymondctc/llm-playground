@@ -1,4 +1,12 @@
+chardet
+dateparser
+faiss-cpu
 langchain
+openai
+panda
+pinecone-client
 pypdf2
 python-dotenv
+sentence_transformers
 streamlit
+tiktoken
