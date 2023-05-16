@@ -191,24 +191,7 @@ def _query_llm(index_name, filter_dict, embeddings, llm: BaseLanguageModel, quer
 
 def main():
     index_name = os.getenv("PINECONE_INDEX")
-        
-    q="""
-    You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store between. 
-    Please give a detailed summary for positive, negative and neutral mixed feedbacks in March 2023, present them in bullet forms (At least 5 bullet points).
-    What are the most of the critical issue of 9GAG overall.
-    What do you suggest we focus on improving?
-    """
-
-    extract_filter_llm = OpenAI(temperature=0.0)
-    info_dict = _extract_info_query(extract_filter_llm, q)
-    print(f"info_dict extracted={info_dict}")
-
-    filter_dict = _create_filter(infodict=info_dict)
-    print(f"filter_dict created={filter_dict}")
-
-    chat_llm = ChatOpenAI(temperature=0.5)
-    chat_embeddings = HuggingFaceEmbeddings()
-    _query_llm(index_name=index_name, filter_dict=filter_dict, embeddings=chat_embeddings, llm=chat_llm, query=q)
+    embeddings = HuggingFaceEmbeddings()
 
     # docs = _load_csv("./datafiles/reviews_202303.csv")
     # _upsert_pinecone(docs, embeddings)
@@ -216,60 +199,25 @@ def main():
     # docs = _load_csv("./datafiles/reviews_202304.csv")
     # _upsert_pinecone(docs, embeddings)
 
-    # docs = _load_csv("./datafiles/reviews_202305.csv")
-    # _upsert_pinecone(docs, embeddings)
-    
-    # begin = int(dateparser.parse("01-04-2023", date_formats=["%d-%m-%Y"]).timestamp() * 1000)
-    # end = int(dateparser.parse("01-04-2023", date_formats=["%d-%m-%Y"]).timestamp() * 1000)
+    docs = _load_csv("./datafiles/reviews_202305.csv")
+    _upsert_pinecone(docs, embeddings)
 
-    # print(f"begin={begin}, end={end}")
-
-    # 1646121600000.0
-    # 1681116520708
-
-    # docsearch = Pinecone.from_existing_index(index_name, embeddings)
-    # res = docsearch.similarity_search("bad", filter={
-    #     "$and": [
-    #         { "last_update_ts": { "$gte": begin } }, 
-    #         { "last_update_ts": { "$lte": end } }
-    #     ]
-    # })
-    # res = docsearch.similarity_search("comment", filter={ "last_update_ts": { "$gte": begin } })
-    # print(res)
-    # print(_extract_dt("ss"))
-
-    # _upsert_pinecone(docs, embeddings)
-
-    # embeddings = OpenAIEmbeddings()
-    # docsearch = Pinecone.from_existing_index(index_name, embeddings)
-    # docsearch.similarity_search("")
-
-
-    # llm = ChatOpenAI(temperature=0.5)
-    # review_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(), verbose=True)
     # q="""
-    # You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store.  
-    # Please give a detailed summary for positive, negative and neutral mixed feedbacks, present them in bullet forms (At least 5 bullet points).
-    # What are the most of the critical issue of 9GAG overall apart from the recent comment changes, comment and "for you" section.
+    # You are a data analyst. The data you see are app reviews for the app called 9GAG from Google Play Store and it contains all the information in 2023. 
+    # Please give a detailed summary for positive, negative and neutral mixed feedbacks in May 2023, present them in bullet forms (At least 5 bullet points).
+    # What are the most of the critical issue of 9GAG overall.
     # What do you suggest we focus on improving?
     # """
-    # result = review_chain.run(q)
-    # print(result)
 
-    # docs = _load_csv("./datafiles/reviews_202303.csv")
-    # q="""
+    # extract_filter_llm = OpenAI(temperature=0.0)
+    # info_dict = _extract_info_query(extract_filter_llm, q)
+    # print(f"info_dict extracted={info_dict}")
 
-    # docs = _load_csv("./datafiles/reviews_202303.csv")
-    # print(docs[1])
-    
-    # docs = _load_csv("./datafiles/reviews_202304.csv")
-    # embeddings = OpenAIEmbeddings()
-    # _upsert_pinecone(docs, embeddings)
-    # df = _load_df("./datafiles/reviews_202303.csv")
-    # print(df.columns[0].title())
-    # print(df.to_dict("records")[2])
-    #_load_data("datafiles/reviews_202303.csv")
-    #_load_data("datafiles/reviews_202303.csv")
+    # filter_dict = _create_filter(infodict=info_dict)
+    # print(f"filter_dict created={filter_dict}")
+
+    # chat_llm = ChatOpenAI(temperature=0.5)
+    # _query_llm(index_name=index_name, filter_dict=filter_dict, embeddings=embeddings, llm=chat_llm, query=q)
 
 if __name__ == "__main__":
     main()
