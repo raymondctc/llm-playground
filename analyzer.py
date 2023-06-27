@@ -17,7 +17,8 @@ from langchain.chains import RetrievalQA
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.indexes import VectorstoreIndexCreator
-from play_store_review_loader import PlayStoreReviewLoader
+from csv_loader.play_store_review_loader import PlayStoreReviewLoader
+from csv_loader.appflow_review_loader import AppFlowReviewLoader
 import re
 
 load_dotenv()
@@ -36,6 +37,15 @@ def _load_csv(path):
     with open(path, 'rb') as f:
         result = cd.detect(f.read())
     loader = PlayStoreReviewLoader(
+        path, 
+        encoding=result['encoding']
+    )
+    return loader.load()
+
+def _load_appflow_csv(path):
+    with open(path, 'rb') as f:
+        result = cd.detect(f.read())
+    loader = AppFlowReviewLoader(
         path, 
         encoding=result['encoding']
     )
@@ -170,20 +180,21 @@ def _create_filter(infodict):
 
 def _query_llm(index_name, filter_dict, embeddings, llm: BaseLanguageModel, query: str) -> None:
     docsearch = Pinecone.from_existing_index(index_name, embeddings)
+    k = 40
 
     if filter_dict is not None:
         print(f"Retrieving with filter, dict={filter_dict}")
         retriever = docsearch.as_retriever(
             search_kwargs={
                 "filter": filter_dict,
-                "k": 30 # Configuration for getting top_k similar results
+                "k": k # Configuration for getting top_k similar results
             }
         )
     else:
         print(f"Retrieving without filter")
         retriever = docsearch.as_retriever(
             search_kwargs={
-                "k": 30 # Configuration for getting top_k similar results
+                "k": k # Configuration for getting top_k similar results
             }
         )
     
@@ -200,26 +211,39 @@ def main():
     index_name = os.getenv("PINECONE_INDEX")
     embeddings = HuggingFaceEmbeddings()
 
-    # docs = _load_csv("./datafiles/reviews_202303.csv")
+    # docs = _load_csv("./datafiles/reviews_202301.csv")
     # _upsert_pinecone(docs, embeddings)
 
-    # docs = _load_csv("./datafiles/reviews_202304.csv")
+    # docs = _load_csv("./datafiles/reviews_202302.csv")
     # _upsert_pinecone(docs, embeddings)
 
     # docs = _load_csv("./datafiles/reviews_202305.csv")
     # _upsert_pinecone(docs, embeddings)
 
+    # docs = _load_csv("./datafiles/reviews_202306.csv")
+    # _upsert_pinecone(docs, embeddings)
+
+    # docs = _load_appflow_csv("./datafiles/reviews_appflow_ios_20230626.csv")
+    # _upsert_pinecone(docs, embeddings)
+
     q="""
-    You are a data analyst of 9GAG. 9GAG is a social media platform that support UGC contents.
-    The following data you see are all of the app reviews in 2023 downloaded from Google Play Store. 
+    The following data you see are app reviews data of 9GAG in 2023 exported from Google Play Store. 
+    9GAG is a social media platform that support UGC contents. The goal of the site is provide fun to our users.
+    You are a data analyst of 9GAG, your job is to assist our product manager to make 9GAG a better site for our users. 
+    
     Please give a detailed summary for positive, negative and neutral mixed feedbacks, present them in bullet forms (At least 5 bullet points).
-    What are the most of the critical issue of 9GAG overall.
-    What do you suggest we focus on improving?
+    What are the most of the critical issue of 9GAG overall (Give at least 5 points).
+    What do you suggest we focus on improving? (Give at least 5 points)
     """
 
-    extract_filter_llm = OpenAI(temperature=0.0)
-    info_dict = _extract_info_query(extract_filter_llm, q)
-    print(f"info_dict extracted={info_dict}")
+    # extract_filter_llm = OpenAI(temperature=0.0)
+    # info_dict = _extract_info_query(extract_filter_llm, q)
+    # print(f"info_dict extracted={info_dict}")
+
+    info_dict = {
+        "dates": None,
+        "ratings": None
+    }
 
     filter_dict = _create_filter(infodict=info_dict)
     print(f"filter_dict created={filter_dict}")
