@@ -9,4 +9,5 @@ pypdf2
 python-dotenv
 sentence_transformers
 streamlit
+streamlit-chat
 tiktoken
